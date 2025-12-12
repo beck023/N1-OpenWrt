@@ -60,8 +60,8 @@ jobs:
       run: |
         rm -rf openwrt/files openwrt/.config
         mv armsr/armv8/N1/files armsr/armv8/N1/.config openwrt/
-		mv mine/.config openwrt/.config
-		mv mine/network openwrt/etc/config/network
+        mv mine/.config openwrt/.config
+        mv mine/network openwrt/files/etc/config/network
 
     - name: SSH connect to Actions
       uses: P3TERX/ssh2actions@main
