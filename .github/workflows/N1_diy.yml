@@ -110,6 +110,14 @@ jobs:
         WHOAMI: nantayo
         SW_FLOWOFFLOAD: 0
         SFE_FLOW: 0
+        
+    - name: Rename firmware with config suffix
+      run: |
+        CONFIG_NAME="${{ github.event.inputs.config }}"
+        for f in ${{ env.PACKAGED_OUTPUTPATH }}/*.img.xz; do
+          base=$(basename "$f" .img.xz)
+          mv "$f" "${{ env.PACKAGED_OUTPUTPATH }}/${base}_${CONFIG_NAME}.img.xz"
+        done
 
     - name: Upload firmware to release
       uses: softprops/action-gh-release@master
@@ -126,5 +134,5 @@ jobs:
     - name: Delete old releases
       uses: dev-drprasad/delete-older-releases@master
       with:
-        keep_latest: 2
+        keep_latest: 5
         delete_tags : true
