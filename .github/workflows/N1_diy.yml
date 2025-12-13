@@ -69,13 +69,13 @@ jobs:
         mv armsr/armv8/N1/.config openwrt/.config
 
         if [ "${{ github.event.inputs.config }}" = "n1" ]; then
-          mv mine/network openwrt/files/etc/config/network
-          mv mine/.config openwrt/.config
+          mv mine/n1.network openwrt/files/etc/config/network
+          mv mine/n1.config openwrt/.config
         elif [ "${{ github.event.inputs.config }}" = "docker" ]; then
-          mv mine/network-docker openwrt/files/etc/config/network
+          mv mine/docker.network openwrt/files/etc/config/network
           mv mine/docker.config openwrt/.config
         elif [ "${{ github.event.inputs.config }}" = "nantayo" ]; then
-          mv mine/network-nantayo openwrt/files/etc/config/network
+          mv mine/nantayo.network openwrt/files/etc/config/network
           # 保持 nantayo 默认 .config，不做额外覆盖
           echo "使用 nantayo 默认配置 + 自定义网络"
         fi
