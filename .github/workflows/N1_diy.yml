@@ -2,6 +2,11 @@ name: ImmortalWrt-24.10 for N1
 
 on:
   workflow_dispatch:
+    inputs:
+      config:
+        description: "选择配置文件 (n1 或 docker)"
+        required: true
+        default: "n1"
 
 env:
   GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
@@ -56,12 +61,18 @@ jobs:
         ./scripts/feeds update -a
         ./scripts/feeds install -a
 
-    - name: Load N1 custom config
+    - name: Load custom config
       run: |
         rm -rf openwrt/files openwrt/.config
         mv armsr/armv8/N1/files armsr/armv8/N1/.config openwrt/
-        mv mine/.config openwrt/.config
-        mv mine/network openwrt/files/etc/config/network
+        if [ "${{ github.event.inputs.config }}" = "n1" ]; then
+          mv mine/network openwrt/files/etc/config/network
+          mv mine/.config openwrt/.config
+        elif [ "${{ github.event.inputs.config }}" = "docker" ]; then
+          mv mine/network openwrt/files/etc/config/network
+          mv mine/docker.config openwrt/.config
+          # 如果 docker.config 需要额外的 files，可以在这里加
+        fi
 
     - name: SSH connect to Actions
       uses: P3TERX/ssh2actions@main
