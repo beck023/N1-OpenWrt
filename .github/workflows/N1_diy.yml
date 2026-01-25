@@ -2,6 +2,11 @@ name: ImmortalWrt-24.10 for N1
 
 on:
   workflow_dispatch:
+    inputs:
+      config:
+        description: "选择配置文件 (nantayo / n1 / docker)"
+        required: true
+        default: "n1"
 
 env:
   GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
@@ -56,12 +61,24 @@ jobs:
         ./scripts/feeds update -a
         ./scripts/feeds install -a
 
-    - name: Load N1 custom config
+    - name: Load custom config
       run: |
         rm -rf openwrt/files openwrt/.config
-        mv armsr/armv8/N1/files armsr/armv8/N1/.config openwrt/
-        mv mine/.config openwrt/.config
-        mv mine/network openwrt/files/etc/config/network
+        # 默认加载 nantayo 提供的基础 files 和 .config
+        mv armsr/armv8/N1/files openwrt/files
+        mv armsr/armv8/N1/.config openwrt/.config
+
+        if [ "${{ github.event.inputs.config }}" = "n1" ]; then
+          mv mine/n1.network openwrt/files/etc/config/network
+          mv mine/n1.config openwrt/.config
+        elif [ "${{ github.event.inputs.config }}" = "docker" ]; then
+          mv mine/docker.network openwrt/files/etc/config/network
+          mv mine/docker.config openwrt/.config
+        elif [ "${{ github.event.inputs.config }}" = "nantayo" ]; then
+          mv mine/nantayo.network openwrt/files/etc/config/network
+          # 保持 nantayo 默认 .config，不做额外覆盖
+          echo "使用 nantayo 默认配置 + 自定义网络"
+        fi
 
     - name: SSH connect to Actions
       uses: P3TERX/ssh2actions@main
@@ -93,6 +110,14 @@ jobs:
         WHOAMI: nantayo
         SW_FLOWOFFLOAD: 0
         SFE_FLOW: 0
+
+    - name: Rename firmware with config suffix
+      run: |
+        CONFIG_NAME="${{ github.event.inputs.config }}"
+        for f in ${{ env.PACKAGED_OUTPUTPATH }}/*.img.xz; do
+          base=$(basename "$f" .img.xz)
+          mv "$f" "${{ env.PACKAGED_OUTPUTPATH }}/${base}_${CONFIG_NAME}.img.xz"
+        done
 
     - name: Upload firmware to release
       uses: softprops/action-gh-release@master
