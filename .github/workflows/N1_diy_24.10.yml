@@ -6,7 +6,7 @@ on:
       config:
         description: "选择配置文件 (nantayo / n1 / docker)"
         required: true
-        default: "n1"
+        default: "docker"
 
 env:
   GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
